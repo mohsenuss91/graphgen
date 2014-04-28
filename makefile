@@ -1,31 +1,35 @@
-HDR = $(wildcard incl/*.hpp)
-SRC = $(wildcard src/*.cpp)
+# placeholder
+
+dirName = `basename $(PWD)`
+currentDate = `date +%D | sed 's/\//-/g'`
+fileName = ../$(dirName)-$(currentDate).tar.gz
+
+HDR = $(wildcard src/*.hpp)
+ALL_SRC = $(wildcard src/*.cpp)
+BLACKLIST = src/calculate_stats_us_binpacking.cpp src/EvaluateMapping.cpp src/GeneticAlgorithm.cpp src/SimulatedAnnealing.cpp
+SRC = $(filter-out $(BLACKLIST), $(ALL_SRC))
+#HDR = code/*.cpp 
 OBJ = ${SRC:.cpp=.o}
-LINK = 
-EXE = runme.exe
+LINK = -lcrypto
+EXE = main.exe
 CPP = g++
 CPPFLAGS = -O3 -g -Iincl/
 STRIP = strip
-.PHONY = clean export clean-all
+.PHONY = clean export clean-all backup
 TEMP = $(shell ls | grep -v "makefile")
 
 all: ${EXE}
 
+#${OBJ}: ${SRC}
+#		${CPP} ${CPPFLAGS} -c ${SRC} -o ${OBJ}
+
 $(EXE): ${OBJ}
+#		${CPP} ${CPPFLAGS} -o ${EXE} ${OBJ}
 		${CPP} ${CPPFLAGS} ${OBJ} ${LINK} -o ${EXE}
 		${STRIP} ${EXE}
 
-Floyd-Warshall.o : makefile Floyd-Warshall.cpp Floyd-Warshall.hpp
-		${CPP} ${CPPFLAGS} ${LINK} -c Floyd-Warshall.cpp -o Floyd-Warshall.o
-
-GraphIR.o : makefile GraphIR.cpp GraphIR.hpp
-		${CPP} ${CPPFLAGS} ${LINK} -c GraphIR.cpp -o GraphIR.o
-
-RandomGraph.o : makefile RandomGraph.cpp RandomGraph.hpp
-		${CPP} ${CPPFLAGS} ${LINK} -c RandomGraph.cpp -o RandomGraph.o
-
-main.o : makefile Floyd-Warshall.cpp GraphIR.cpp RandomGraph.cpp
-		${CPP} ${CPPFLAGS} -c main.cpp -o main.o
+%.o: %.cpp
+		$(CPP) -c $(CPPFLAGS) $< -o $@
 
 # Make modifiers
 clean:
@@ -37,4 +41,6 @@ clean-all:
 
 export:
 		rm -rf ${OBJ} ${EXE}
-		tar --exclude=*git* --exclude=*input* --exclude=*output* -czvf SA-Dependencies.tar.gz ../SA-Dependencies/*
+		tar --exclude=*git* --exclude=*input* --exclude=*output* --exclude=.git* -czvf SDC.tar.gz ../SDC/*
+backup:
+	tar --exclude=*git* --exclude=*input* --exclude=*output* --exclude=.git* -czvf $(fileName) $(PWD)/*

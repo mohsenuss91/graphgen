@@ -1,5 +1,5 @@
-#ifndef FLOYD_WARSHALL_HPP
-#define FLOYD_WARSHALL_HPP
+#ifndef _FLOYD_WARSHALL_HPP
+#define _FLOYD_WARSHALL_HPP
 
 #include <iostream>
 #include <vector>
