@@ -74,6 +74,8 @@ RAGGenerator :: printDOTFile()
 int
 RAGGenerator :: run()
 {
+	DEBUG1(cout<<"\n[RAGGenerator::run] - Entering";)
+
 	srand( time(NULL) );
 	int i=0, j=0;
 	level=0;
@@ -82,10 +84,10 @@ RAGGenerator :: run()
 	double off = 0.3;
 
 	cout<<fixed;
-
 	// Calculate height and width of the graph
 	height = ceil( sqrt( numberOfNodes )/alpha );
 	avgWidth = ceil( sqrt( numberOfNodes ) * alpha );
+	DEBUG1(cout<<"\n[run] - height="<<height<<" | avgWidth="<<avgWidth;)
 	for(level=0; ; level++)
 	{
 		vector < int64_t > buffer( 0 );
@@ -126,28 +128,18 @@ RAGGenerator :: run()
 		}
 	}
 	jumpOut:
-	cout<<"\nO/P: nodesInList.size="<<nodesInList.size()<<"level="<<level<<" height="<<height<<" width="<<avgWidth<<"nodesAllocated="<<nodesAllocated<<endl;
+	DEBUG1(cout<<"\nO/P: nodesInList.size="<<nodesInList.size()<<"level="<<level<<" height="<<height<<" width="<<avgWidth<<"nodesAllocated="<<nodesAllocated<<endl;)
 
-	cout<<"\nHeight before pruning : "<<height;
+	DEBUG1(cout<<"\nHeight before pruning : "<<height;)
 	vector < vector < int64_t > >::iterator it1;
 	for(it1=nodesInList.begin(); it1!=nodesInList.end(); ++it1)
 		if((*it1).size() == 0)
 		{
-			cout<<"***yoink***";
+			DEBUG2(cout<<"***yoink***";)
 			nodesInList.erase(it1);
 			it1--;
 		}
 	height = nodesInList.size();
-	cout<<"\nHeight after pruning : "<<height;
-
-	for(i=0; i<height; ++i)
-	{
-		cout<<"Level "<<i+1<<" : ";
-		vector < int64_t >::iterator it;
-		for(it = nodesInList[i].begin(); it!= nodesInList[i].end(); ++it)
-			cout<<(*it)<<"-";
-		cout<<"\n";
-	}
 
 	double weightOfDAG = randomInRange( pow(10,4), pow(10,5) );
 	// Assign vertex weights
@@ -167,17 +159,19 @@ RAGGenerator :: run()
 	// In each iteration, go through all nodes in level i.
 	for(i=0; i<height-1; ++i)
 	{
+		DEBUG2(cout<<"\nLevel"<<i;)
 		vector < int64_t >::iterator it;
 		for(it = nodesInList[i].begin(); it!= nodesInList[i].end(); ++it)
 		{
 			int64_t numberOfOutDegree = randomInRange( outDegree*(1-off), outDegree*(1+off) );
+			DEBUG2(cout<<"\n\tnumberOfOutDegree="<<numberOfOutDegree;)
 			// For each such node j, make a connection to k where k's level is >= j's level.
 			// Choose 1 to outDegree such k's for each j.
 			for(j=0; j<numberOfOutDegree; ++j)
 			{
 				int64_t t1 = randomInRange(i+1, height-1);
 				int64_t t2 = randomInRange(0, nodesInList[t1].size()-1);
-				
+				DEBUG3(cout<<" | ("<<t1<<","<<t2<<")";)				
 				pair < int64_t, double > temp;
 				temp.first = nodesInList[t1][t2];
 				temp.second = ceil( randomGraph.singleConstraintVwgt[ (*it) ] * CCR );
@@ -223,19 +217,32 @@ RAGGenerator :: run()
 				temp.first = currentNode;
 				temp.second = ceil( randomGraph.singleConstraintVwgt[ nodesInList[t1][t2] ] * CCR );
 				randomGraph.connectivityMatrix[ nodesInList[t1][t2] ].list.push_back( temp );
+				DEBUG2(cout<<"\nT["<<currentNode<<"] doesnt have any parents | forming a connection from T["<<nodesInList[t1][t2]<<"] to "<<currentNode;)
 				numberOfEdges++;
-		
 			}
 		}
 	}
+
+	DEBUG1(cout<<"\nHeight after pruning and introducing comm links: "<<height<<endl;)
+	for(i=0; i<height; ++i)
+	{
+		DEBUG1(cout<<"Level "<<i+1<<" : ";)
+		vector < int64_t >::iterator it;
+		for(it = nodesInList[i].begin(); it!= nodesInList[i].end(); ++it)
+			DEBUG1(cout<<(*it)<<"-";)
+		DEBUG1(cout<<"\n";)
+	}
+
 	
-	cout<<"\nNumber of Edges = "<<numberOfEdges;
+	DEBUG1(cout<<"\nNumber of Edges = "<<numberOfEdges<<endl;)
 	filename=string("app-");
 	ostringstream oss;
 	oss<<filename<<numberOfNodes<<"-"<<outDegree<<"-"<<CCR<<"-"<<alpha<<"-"<<beta<<"-"<<gamma << ".grf";
 	filename = oss.str();
 	randomGraph.createMETISFile(numberOfNodes, numberOfEdges, _NUM_CONSTRAINTS, filename);
 	printDOTFile();
+
+	DEBUG1(cout<<"\n[RAGGenerator::run] - Exiting\n";)
 }
 
 int

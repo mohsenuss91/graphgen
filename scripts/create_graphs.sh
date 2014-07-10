@@ -1,5 +1,6 @@
-executable=/home/aravind/Work/Task-Partitioning/Random-Graph-Generator/RandomGraph
-destinationdir=random-graphs-r2
+executable=/home/aravind/Work/Task-Partitioning/Random-Graph-Generator/main.exe
+destinationAPPdir=random-graphs-r2
+destinationDOTdir=random-graphs-r2-DOT
 
 #node=( 256 1024 16384 65536)
 #indegree=(1)
@@ -17,7 +18,7 @@ alpha=(0.1 1.0 10.0)
 beta=(5 25 50 75 95)
 gamma=(5 25 50 75 95)
 
-mkdir -p $destinationdir;
+mkdir -p $destinationAPPdir;
 
 f()
 {
@@ -54,4 +55,5 @@ f()
 
 f
 
-mv app*.grf $destinationdir/
+mv app*.grf $destinationAPPdir/
+mv app*.dot $destinationDOTdir/
